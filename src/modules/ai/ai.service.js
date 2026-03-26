@@ -21,13 +21,13 @@ function formatDate(date) {
 async function analyzeEmail(subject, from, body) {
   let text = `${subject} ${from} ${body}`.toLowerCase();
 
-  // 🧹 limpiar texto
+  //  limpiar texto
   text = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
   const keywords = ['reunión', 'reunion', 'junta', 'tarea', 'entrega', 'deadline'];
   const isTask = keywords.some(word => text.includes(word));
 
-  // 🔥 PRIORIDAD DINÁMICA
+  //  PRIORIDAD DINÁMICA
   let prioridad = 'media';
 
   if (
@@ -50,7 +50,7 @@ async function analyzeEmail(subject, from, body) {
 
   const today = new Date();
 
-  // 📅 HOY
+  //  HOY
   if (text.includes('hoy')) {
     fechaTexto = 'hoy';
     fechaReal = today;
@@ -64,7 +64,7 @@ async function analyzeEmail(subject, from, body) {
     fechaReal = d;
   }
 
-  // 📅 PASADO MAÑANA
+  //  PASADO MAÑANA
   if (text.includes('pasado mañana')) {
     const d = new Date();
     d.setDate(today.getDate() + 2);
@@ -72,7 +72,7 @@ async function analyzeEmail(subject, from, body) {
     fechaReal = d;
   }
 
-  // 📅 DÍAS DE LA SEMANA
+  //  DÍAS DE LA SEMANA
   const dias = ['lunes','martes','miercoles','miércoles','jueves','viernes','sabado','sábado','domingo'];
 
   for (let dia of dias) {
@@ -84,7 +84,7 @@ async function analyzeEmail(subject, from, body) {
     }
   }
 
-  // 📅 FECHA tipo "27 de marzo"
+  //  FECHA tipo "27 de marzo"
   const fechaMatch = text.match(/(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/);
 
   if (fechaMatch) {
@@ -100,7 +100,7 @@ async function analyzeEmail(subject, from, body) {
     fechaReal = new Date(year, mes, dia);
     fechaTexto = `${dia} de ${fechaMatch[2]}`;
   }
-  // 📅 FECHA formato 27/03/2026 o 27-03-2026 o 27/03
+  //  FECHA formato 27/03/2026 o 27-03-2026 o 27/03
 const fechaNumerica = text.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?/);
 
 if (fechaNumerica) {
@@ -114,7 +114,7 @@ if (fechaNumerica) {
   fechaTexto = `${dia}/${mes + 1}/${year}`;
 }
 
-  // ⏰ Detectar hora
+  //  Detectar hora
   const horaRegex = /(\d{1,2})[:.](\d{2})/;
   const match = text.match(horaRegex);
 
@@ -123,7 +123,7 @@ if (fechaNumerica) {
     hora = `${match[1]}:${match[2]}`;
   }
 
-  // 🔥 PRIORIDAD SEGÚN FECHA
+  //  PRIORIDAD SEGÚN FECHA
   if (fechaTexto === 'hoy') prioridad = 'alta';
   if (fechaTexto === 'mañana' && prioridad === 'media') prioridad = 'alta';
 
@@ -136,7 +136,7 @@ if (fechaNumerica) {
     prioridad: prioridad
   };
 
-  // 🧪 DEBUG
+  //  DEBUG
   console.log('🔍 TEXTO ANALIZADO:', text);
   console.log('📅 FECHA TEXTO:', result.fecha);
   console.log('📆 FECHA REAL:', result.fecha_real);

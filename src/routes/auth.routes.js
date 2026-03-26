@@ -4,7 +4,7 @@ const oauth2Client = require('../config/gmail');
 const fs = require('fs');
 const path = require('path');
 
-// 🚀 Ruta para iniciar login con Google
+//  Ruta para iniciar login con Google
 router.get('/google', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',      // 👈 necesario para refresh_token
@@ -15,7 +15,7 @@ router.get('/google', (req, res) => {
   res.redirect(url);
 });
 
-// 🚀 Callback
+//  Callback
 router.get('/google/callback', async (req, res) => {
   try {
     const code = req.query.code;
@@ -24,7 +24,7 @@ router.get('/google/callback', async (req, res) => {
 
     oauth2Client.setCredentials(tokens);
 
-    // 👇 guardar tokens
+    //  guardar tokens
     fs.writeFileSync(
       path.join(__dirname, '../../tokens.json'),
       JSON.stringify(tokens, null, 2)

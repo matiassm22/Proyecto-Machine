@@ -4,6 +4,7 @@ require('./modules/whatsapp/whatsapp.service');
 const express = require('express');
 const authRoutes = require('./routes/auth.routes');
 const { getEmails } = require('./modules/email/email.service');
+const { startScheduler } = require('./jobs/scheduler'); // 👈 FALTABA
 
 const app = express();
 
@@ -19,6 +20,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+//  INICIAR RECORDATORIOS
+startScheduler();
 
 //  Ejecutar al inicio
 getEmails();
