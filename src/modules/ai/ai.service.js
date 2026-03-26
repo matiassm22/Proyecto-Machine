@@ -1,51 +1,49 @@
-async function analyzeEmail(subject, from) {
-  const text = `${subject} ${from}`.toLowerCase();
+async function analyzeEmail(subject, from, body) {
+  let text = `${subject} ${from} ${body}`.toLowerCase();
 
-  const keywords = ['reunión', 'junta', 'tarea', 'entrega', 'deadline'];
+  // limpiar texto
+  text = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+
+  const keywords = ['reunión', 'reunion', 'junta', 'tarea', 'entrega', 'deadline'];
 
   const isTask = keywords.some(word => text.includes(word));
 
-  //  DETECCIÓN DE PRIORIDAD
-  let prioridad = 'media';
-
-  if (
-    text.includes('urgente') ||
-    text.includes('hoy') ||
-    text.includes('ahora') ||
-    text.includes('asap')
-  ) {
-    prioridad = 'alta';
-  } else if (
-    text.includes('mañana') ||
-    text.includes('pronto') ||
-    text.includes('esta semana')
-  ) {
-    prioridad = 'media';
-  } else if (
-    text.includes('cuando puedas') ||
-    text.includes('sin apuro') ||
-    text.includes('luego')
-  ) {
-    prioridad = 'baja';
-  }
-
-  //  DETECCIÓN DE FECHA SIMPLE
-  let fecha = null;
-
-  if (text.includes('lunes')) fecha = 'lunes';
-  else if (text.includes('martes')) fecha = 'martes';
-  else if (text.includes('miércoles') || text.includes('miercoles')) fecha = 'miércoles';
-  else if (text.includes('jueves')) fecha = 'jueves';
-  else if (text.includes('viernes')) fecha = 'viernes';
-  else if (text.includes('sábado') || text.includes('sabado')) fecha = 'sábado';
-  else if (text.includes('domingo')) fecha = 'domingo';
-
-  return {
+  let result = {
     es_tarea: isTask,
     titulo: subject,
-    fecha,
-    prioridad
+    fecha: null,
+    hora: null,
+    prioridad: 'media'
   };
+
+  // Detectar días
+  const dias = ['lunes', 'martes', 'miercoles', 'miércoles', 'jueves', 'viernes', 'sabado', 'sábado', 'domingo'];
+
+  for (let dia of dias) {
+    if (text.includes(dia)) {
+      result.fecha = dia;
+      break;
+    }
+  }
+
+  // Detectar "mañana"
+  if (text.includes('mañana')) {
+    result.fecha = 'mañana';
+  }
+
+  // Detectar hora 
+  const horaRegex = /(\d{1,2})[:.](\d{2})/;
+  const match = text.match(horaRegex);
+
+  if (match) {
+    result.hora = `${match[1]}:${match[2]}`;
+  }
+
+  // DEBUG 
+  console.log('🔍 TEXTO ANALIZADO:', text);
+  console.log('🕐 HORA DETECTADA:', result.hora);
+
+  return result;
 }
 
 module.exports = { analyzeEmail };

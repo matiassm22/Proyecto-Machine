@@ -13,9 +13,9 @@ const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
 async function getEmails() {
   try {
-    // 📥 Leer correos ya procesados
     let processed = [];
 
+    // 📥 Leer correos ya procesados
     if (fs.existsSync(processedPath)) {
       processed = JSON.parse(fs.readFileSync(processedPath));
     }
@@ -35,9 +35,7 @@ async function getEmails() {
     for (let msg of messages) {
 
       // 🚫 Evitar duplicados
-      if (processed.includes(msg.id)) {
-        continue;
-      }
+      if (processed.includes(msg.id)) continue;
 
       const email = await gmail.users.messages.get({
         userId: 'me',
@@ -46,26 +44,44 @@ async function getEmails() {
 
       const headers = email.data.payload.headers;
 
-      const subject = headers.find(h => h.name === 'Subject')?.value;
-      const from = headers.find(h => h.name === 'From')?.value;
+      const subject = headers.find(h => h.name === 'Subject')?.value || '';
+      const from = headers.find(h => h.name === 'From')?.value || '';
 
-      const analysis = await analyzeEmail(subject, from);
+      // 📩 EXTRAER CONTENIDO DEL CORREO
+      let body = '';
+      const payload = email.data.payload;
+
+      if (payload.parts) {
+        const part = payload.parts.find(p => p.mimeType === 'text/plain');
+
+        if (part && part.body && part.body.data) {
+          body = Buffer.from(part.body.data, 'base64').toString('utf-8');
+        }
+      } else if (payload.body && payload.body.data) {
+        body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
+      }
+
+      // 🧠 ANALIZAR
+      const analysis = await analyzeEmail(subject, from, body);
 
       console.log('📩 Email:');
       console.log('De:', from);
       console.log('Asunto:', subject);
+      console.log('Contenido:', body);
       console.log('Análisis:', analysis);
       console.log('----------------------');
 
       // 📲 Enviar solo si es tarea
       if (analysis.es_tarea) {
+
         const mensaje = `📌 Nueva tarea detectada
 
-${analysis.titulo}
+📌 ${analysis.titulo}
 📅 ${analysis.fecha || 'Sin fecha'}
+⏰ ${analysis.hora || 'Sin hora'}
 ⚠️ Prioridad: ${analysis.prioridad}`;
 
-        await sendMessage('56944095023', mensaje); // 👈 CAMBIA TU NÚMERO
+        await sendMessage('56944095023', mensaje); // 👈 TU NÚMERO
       }
 
       // 💾 Guardar como procesado
