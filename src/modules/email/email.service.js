@@ -2,7 +2,7 @@ const { google } = require('googleapis');
 const oauth2Client = require('../../config/gmail');
 const { analyzeEmail } = require('../ai/ai.service');
 const { sendMessage } = require('../whatsapp/whatsapp.service');
-const { addTask } = require('../tasks/task.service'); // 👈 NUEVO
+const { addTask } = require('../tasks/task.service');
 
 const fs = require('fs');
 const path = require('path');
@@ -48,7 +48,7 @@ async function getEmails() {
       const subject = headers.find(h => h.name === 'Subject')?.value || '';
       const from = headers.find(h => h.name === 'From')?.value || '';
 
-      //  EXTRAER CONTENIDO DEL CORREO
+      //  EXTRAER CONTENIDO
       let body = '';
       const payload = email.data.payload;
 
@@ -62,7 +62,7 @@ async function getEmails() {
         body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
       }
 
-      //  ANALIZAR
+      // 🧠 ANALIZAR
       const analysis = await analyzeEmail(subject, from, body);
 
       console.log('📩 Email:');
@@ -72,7 +72,7 @@ async function getEmails() {
       console.log('Análisis:', analysis);
       console.log('----------------------');
 
-      //  Enviar solo si es tarea
+      //  SI ES TAREA
       if (analysis.es_tarea) {
 
         const mensaje = `📌 Nueva tarea detectada
@@ -82,15 +82,25 @@ async function getEmails() {
 ⏰ ${analysis.hora || 'Sin hora'}
 ⚠️ Prioridad: ${analysis.prioridad}`;
 
-        await sendMessage('56944095023', mensaje);
+        try {
+          console.log('📤 Enviando mensaje a WhatsApp...');
+          await sendMessage('56944095023', mensaje);
+          console.log('✅ Mensaje enviado');
+        } catch (err) {
+          console.error('❌ Error enviando WhatsApp:', err.message);
+        }
 
-        //  GUARDAR EN SISTEMA DE TAREAS (solo si tiene fecha y hora)
+        //  GUARDAR SOLO SI TIENE FECHA Y HORA
         if (analysis.fecha_real && analysis.hora) {
           addTask({
             titulo: analysis.titulo,
             fecha: analysis.fecha_real,
             hora: analysis.hora
           });
+
+          console.log('💾 Tarea guardada para recordatorio');
+        } else {
+          console.log('⚠️ No se guardó (sin fecha u hora)');
         }
       }
 
@@ -100,7 +110,7 @@ async function getEmails() {
     }
 
   } catch (error) {
-    console.error(error);
+    console.error('🔥 ERROR GENERAL:', error);
   }
 }
 
