@@ -10,7 +10,7 @@ const oauth2Client = new google.auth.OAuth2(
 
 const tokenPath = path.join(__dirname, '../../tokens.json');
 
-// 👇 DEBUG
+//  DEBUG
 console.log('Buscando tokens en:', tokenPath);
 
 if (fs.existsSync(tokenPath)) {
