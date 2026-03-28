@@ -7,8 +7,8 @@ const path = require('path');
 //  Ruta para iniciar login con Google
 router.get('/google', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',      // 👈 necesario para refresh_token
-    prompt: 'consent',           // 👈 fuerza que Google lo entregue
+    access_type: 'offline',      //  necesario para refresh_token
+    prompt: 'consent',           //  fuerza que Google lo entregue
     scope: ['https://www.googleapis.com/auth/gmail.readonly'],
   });
 

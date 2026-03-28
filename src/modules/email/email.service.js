@@ -62,7 +62,7 @@ async function getEmails() {
         body = Buffer.from(payload.body.data, 'base64').toString('utf-8');
       }
 
-      // 🧠 ANALIZAR
+      //  ANALIZAR
       const analysis = await analyzeEmail(subject, from, body);
 
       console.log('📩 Email:');

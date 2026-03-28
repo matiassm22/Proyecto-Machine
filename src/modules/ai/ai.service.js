@@ -56,7 +56,7 @@ async function analyzeEmail(subject, from, body) {
     fechaReal = today;
   }
 
-  // 📅 MAÑANA
+  //  MAÑANA
   if (text.includes('mañana')) {
     const d = new Date();
     d.setDate(today.getDate() + 1);
