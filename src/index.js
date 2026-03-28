@@ -4,16 +4,17 @@ require('./modules/whatsapp/whatsapp.service');
 const express = require('express');
 const authRoutes = require('./routes/auth.routes');
 const { getEmails } = require('./modules/email/email.service');
-const { startScheduler } = require('./jobs/scheduler'); //  FALTABA
+const { startScheduler } = require('./jobs/scheduler');
+const taskRoutes = require('./routes/task.routes');
+const path = require('path');
 
 const app = express();
 
 app.use(express.json());
 app.use('/auth', authRoutes);
+app.use('/tasks', taskRoutes);
+app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/', (req, res) => {
-  res.send('🚀 Proyecto Machine funcionando correctamente');
-});
 
 const PORT = process.env.PORT || 3000;
 

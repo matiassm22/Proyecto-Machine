@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 const tasksPath = path.join(__dirname, '../../../tasks.json');
 
@@ -18,31 +19,52 @@ function saveTasks(tasks) {
 function addTask(task) {
   const tasks = getTasks();
 
-  tasks.push({
-    ...task,
-    recordado: false
-  });
+  const newTask = {
+    id: uuidv4(),
+    titulo: task.titulo,
+    fecha: task.fecha,
+    hora: task.hora,
+    estado: 'pendiente', // 👈 mejor que "recordado"
+    origen: 'email',
+    createdAt: new Date().toISOString()
+  };
 
+  tasks.push(newTask);
   saveTasks(tasks);
+
+  console.log('✅ Tarea guardada:', newTask);
 }
 
 //  obtener pendientes
 function getPendingTasks() {
-  return getTasks().filter(t => !t.recordado);
+  return getTasks().filter(t => t.estado === 'pendiente');
 }
 
-//  marcar como recordado
-function markAsDone(index) {
+//  marcar como completada
+function markAsDone(id) {
   const tasks = getTasks();
 
-  if (tasks[index]) {
-    tasks[index].recordado = true;
-    saveTasks(tasks);
-  }
+  const updated = tasks.map(task => {
+    if (task.id === id) {
+      return { ...task, estado: 'completado' };
+    }
+    return task;
+  });
+
+  saveTasks(updated);
+}
+
+//  eliminar tarea
+function deleteTask(id) {
+  const tasks = getTasks();
+  const filtered = tasks.filter(task => task.id !== id);
+  saveTasks(filtered);
 }
 
 module.exports = {
   addTask,
   getPendingTasks,
-  markAsDone
+  markAsDone,
+  deleteTask,
+  getTasks
 };

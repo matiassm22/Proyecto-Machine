@@ -1,6 +1,6 @@
 const { google } = require('googleapis');
 const oauth2Client = require('../../config/gmail');
-const { analyzeEmail } = require('../ai/ai.service');
+const { analyzeEmail, generateSubtasksAI } = require('../ai/ai.service');
 const { sendMessage } = require('../whatsapp/whatsapp.service');
 const { addTask } = require('../tasks/task.service');
 
@@ -29,7 +29,7 @@ async function getEmails() {
     const messages = res.data.messages;
 
     if (!messages) {
-      console.log('No hay correos');
+      console.log('📭 No hay correos');
       return;
     }
 
@@ -80,8 +80,10 @@ async function getEmails() {
 📌 ${analysis.titulo}
 📅 ${analysis.fecha_real || analysis.fecha || 'Sin fecha'}
 ⏰ ${analysis.hora || 'Sin hora'}
+📍 ${analysis.ubicacion || 'Sin ubicación'}
 ⚠️ Prioridad: ${analysis.prioridad}`;
 
+        //  ENVIAR WHATSAPP
         try {
           console.log('📤 Enviando mensaje a WhatsApp...');
           await sendMessage('56944095023', mensaje);
@@ -90,21 +92,26 @@ async function getEmails() {
           console.error('❌ Error enviando WhatsApp:', err.message);
         }
 
-        //  GUARDAR SOLO SI TIENE FECHA Y HORA
-        if (analysis.fecha_real && analysis.hora) {
-          addTask({
-            titulo: analysis.titulo,
-            fecha: analysis.fecha_real,
-            hora: analysis.hora
-          });
+        //  GUARDAR TAREA (AHORA CON UBICACIÓN)]
+        
+     if (analysis.fecha_real && analysis.hora) {
 
-          console.log('💾 Tarea guardada para recordatorio');
-        } else {
-          console.log('⚠️ No se guardó (sin fecha u hora)');
-        }
+  console.log('🤖 Generando subtareas con IA...');
+  const subtareas = await generateSubtasksAI(body || subject);
+
+  addTask({
+    titulo: analysis.titulo,
+    fecha: analysis.fecha_real,
+    hora: analysis.hora,
+    ubicacion: analysis.ubicacion || null,
+    subtareas: subtareas
+  });
+
+  console.log('💾 Tarea guardada con subtareas IA');
+}
       }
 
-      //  Guardar como procesado
+      //  Marcar como procesado
       processed.push(msg.id);
       fs.writeFileSync(processedPath, JSON.stringify(processed, null, 2));
     }
