@@ -1,26 +1,11 @@
 [
   {
-    "titulo": "Reunión Avance de Proyecto",
-    "fecha": "2026-03-27",
-    "hora": "15:00",
-    "recordado": false
-  },
-  {
-    "titulo": "Reunión Avance de Proyecto",
-    "fecha": "2026-03-27",
-    "hora": "15:01",
-    "recordado": false
-  },
-  {
-    "titulo": "reunion",
-    "fecha": "2026-03-27",
-    "hora": "15:01",
-    "recordado": false
-  },
-  {
-    "titulo": "reunion",
-    "fecha": "2026-03-28",
-    "hora": "15:00",
-    "recordado": false
+    "id": "ccac0b6c-f216-41e5-b4f7-62026a99e819",
+    "titulo": "trabajo",
+    "fecha": "2026-03-03",
+    "hora": "14:00",
+    "estado": "completado",
+    "origen": "email",
+    "createdAt": "2026-03-28T19:34:09.519Z"
   }
 ]
